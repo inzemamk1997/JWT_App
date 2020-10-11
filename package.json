@@ -1,0 +1,23 @@
+{
+  "name": "project",
+  "version": "1.0.0",
+  "description": "Rest API with JWT authentication that can handle multiple client request simultaneously",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/inzemamk1997/JWT_App.git"
+  },
+  "author": "INZEMAM KHAN",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/inzemamk1997/JWT_App/issues"
+  },
+  "homepage": "https://github.com/inzemamk1997/JWT_App#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1"
+  }
+}
