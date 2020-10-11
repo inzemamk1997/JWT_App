@@ -11,16 +11,24 @@ app.get('/api', (req, res) => {
 
 
 //Route that i want to protect using JWT authorization
-app.post('/api/posts', verifyToken,(req, res) => {
-    res.json({
-        message : 'Post Created ....'
+app.post('/api/posts', verifyToken, (req, res) => {
+    jwt.verify(req.token, 'secretkey', (err, authData) => {
+        if (err) {
+            res.sendStatus(403);
+        } else {
+            res.json({
+                message: 'Post Created ....',
+                authData
+            });
+        }
     });
+   
 });
 
 
 //Implement jsonwebtoken.
 //Route to generate jsonwebtoken
-app.post('api/login', (req, res) => {
+app.post('/api/login', (req, res) => {
         //Mock user(In real application the request will go through a database and we will get our user back)
         //payload 
         const user = {
@@ -29,7 +37,7 @@ app.post('api/login', (req, res) => {
             email: 'inzirocks@gmail.com'
         }
 
-       jwt.sign({user}, 'secretkey', (err, token) => {
+    jwt.sign({ user }, 'secretkey', {expiresIn : '60s'} ,(err, token) => {
            res.json({
                //We will get our JWT from here
                token
@@ -44,8 +52,15 @@ function verifyToken(req,res,next) {
     //Get auth header value
     const bearerHeader = req.headers['authorization'];
     //Check if bearer is undefined
-    if (typeof bearerheader !== 'undefined') {
+    if (typeof bearerHeader !== 'undefined') {
         //Split at the space
+        const bearer = bearerHeader.split(' ');
+        //Get token from array
+        const bearerToken = bearer[1];
+        //Set the token
+        req.token = bearerToken;
+        //Next middleware
+        next();
     } else {
         //Forbidden
         res.sendStatus(403);
