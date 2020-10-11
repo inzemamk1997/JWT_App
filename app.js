@@ -9,4 +9,13 @@ app.get('/api', (req, res) => {
     });
 });
 
+//Route that i want to protect using JWT authorization
+app.post('/api/posts', (req, res) => {
+    res.json({
+        message : 'Post Created ....'
+    });
+});
+
+
+
 app.listen(5000, () => console.log('Server started on 5000'));
