@@ -1,25 +1,35 @@
-const express = require("express"); //Fast, unopinionated, minimalist web framework for Node.js
-const jwt = require("jsonwebtoken"); // JWT for authorization
+const express = require("express");
+const jwt = require("jsonwebtoken");
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 const app = express();
-const mySecretKey = "I am a secret. Don't share me at all!";
+const mySecretKey = process.env.JWT_SECRET_KEY;
+
+//console.log(mySecretKey);
 
 app.use(express.json());
 
-//FORMAT OF TOKEN
-//Authorization : Bearer <access_token>
-//verifyToken
 function verifyToken(req, res, next) {
-    //Get auth header value
     // 'x-auth-token' should be send by the client in the header
     const authToken = req.headers["x-auth-token"];
-    //Check if bearer is undefined
+    // check if 'x-auth-token' is undefined
     if (typeof authToken === "string") {
-        req.token = authToken;
-        //Next middleware
-        next();
+        // verify the token (check for validity and expiry)
+        jwt.verify(authToken, mySecretKey, (err, authData) => {
+            if (err) {
+                res.status(401).send({
+                    message: "Invalid token. Please login again!",
+                });
+                return;
+            }
+
+            // call the next middleware
+            next();
+        });
     } else {
-        //Forbidden
+        // forbidden
         res.status(401).send({
             message: "Invalid token. Please login again!",
         });
@@ -33,33 +43,20 @@ app.get("/api", (req, res) => {
     });
 });
 
-//Route that i want to protect using JWT authorization(DATA that is private)
+// route that i want to protect using JWT authorization
 app.get("/api/private", verifyToken, (req, res) => {
-    jwt.verify(req.token, mySecretKey, (err, authData) => {
-        if (err) {
-            res.status(401).send({
-                message: "Invalid token. Please login again!",
-            });
-        } else {
-            res.json({
-                message: "Private data!",
-            });
-        }
-    });
+    res.json({ message: "Private data!" });
 });
 
-//Data that is public that donot need any authorization
 app.get("/api/public", (req, res) => {
     res.json({
         message: "Public data!",
     });
 });
 
-//Implement jsonwebtoken.
-//Route to generate jsonwebtoken
+// route to generate jsonwebtoken
 app.post("/api/login", (req, res) => {
-    //Mock user(In real application the request will go through a database and we will get our user back)
-    //payload
+    // mock user (In real application the request will go through a database and we will get our user back)
 
     const user = req.body.userId;
     const password = req.body.password;
@@ -68,12 +65,10 @@ app.post("/api/login", (req, res) => {
         const dataToSign = {
             username: "Inzi",
         };
-        //JWT generated after Login Authentication
-        //JWT token generated using userId and secret Key
         jwt.sign(
             { dataToSign },
             mySecretKey,
-            { expiresIn: "240s" },
+            { expiresIn: "300s" },
             (err, token) => {
                 res.setHeader("x-auth-token", token);
                 res.json({
@@ -89,4 +84,5 @@ app.post("/api/login", (req, res) => {
     }
 });
 
-app.listen(5000, () => console.log("Server listening on 5000"));
+const PORT = process.env.PORT;
+app.listen(5000, () => console.log(`Server listening on ${PORT}`));
