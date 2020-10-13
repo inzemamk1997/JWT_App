@@ -37,17 +37,13 @@ function verifyToken(req, res, next) {
     }
 }
 
-app.get("/api", (req, res) => {
-    res.json({
-        message: "Welocme to the API",
-    });
-});
 
 // route that i want to protect using JWT authorization
 app.get("/api/private", verifyToken, (req, res) => {
     res.json({ message: "Private data!" });
 });
 
+//Data that is public
 app.get("/api/public", (req, res) => {
     res.json({
         message: "Public data!",
@@ -65,10 +61,11 @@ app.post("/api/login", (req, res) => {
         const dataToSign = {
             username: "Inzi",
         };
+        //JWT token Generator
         jwt.sign(
             { dataToSign },
             mySecretKey,
-            { expiresIn: "300s" },
+            { expiresIn: "600s" },
             (err, token) => {
                 res.setHeader("x-auth-token", token);
                 res.json({
